@@ -12,6 +12,7 @@ pipeline{
                 sh '''
                     npm install
                     npm ci
+                    npm test
                 '''
             }
         }
