@@ -12,6 +12,7 @@ pipeline{
             steps{
                 sh '''
                     apk get update && apk install update
+                    apk install -y curl
                     npm install
                     npm ci
                     npm test
