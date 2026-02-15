@@ -30,8 +30,10 @@ pipeline{
             steps{
                 withCredentials([usernamePassword(credentialsId: 'devopsproject2-docker-creds', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
                     sh '''
+                        docker login -u $DOCKER_USER --password-stdin
                         docker build -t iron5pi3dr11/health-app:${IMAGE_TAG} .
                         docker push iron5pi3dr11/health-app:${IMAGE_TAG}
+                        docker logout
                         '''
                 }
             }
