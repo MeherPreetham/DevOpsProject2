@@ -2,7 +2,7 @@ pipeline{
     agent any
 
     environment{
-        IAMGE_NAME = "iron5pi3dr11/health-app"
+        IMAGE_NAME = "iron5pi3dr11/health-app"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
 
@@ -17,7 +17,7 @@ pipeline{
             }
             steps{
                 sh '''
-                    apk get update && apk install update
+                    apk update && apk install update
                     apk add --no-cache curl
                     npm install
                     npm ci
@@ -80,21 +80,21 @@ pipeline{
             }
             steps {
                 sshagent(credentials: ['prod-ec2-ssh-key']) {
-                sh '''
-                    set -e
+                    sh '''
+                        set -e
 
-                    ssh -o StrictHostKeyChecking=no ${PROD_HOST} '
-                    set -e
-                    # Test through Nginx (public entrypoint), locally on the instance
-                    for i in {1..30}; do
-                        curl -fsS http://localhost/health >/dev/null && break
-                        sleep 1
-                    done
+                        ssh -o StrictHostKeyChecking=no ${PROD_HOST} '
+                        set -e
+                        # Test through Nginx (public entrypoint), locally on the instance
+                        for i in {1..30}; do
+                            curl -fsS http://localhost/health >/dev/null && break
+                            sleep 1
+                        done
 
-                    curl -fsS http://localhost/health
-                    curl -fsS http://localhost/status
-                    '
-                '''
+                        curl -fsS http://localhost/health
+                        curl -fsS http://localhost/status
+                        '
+                    '''
                 }
             }
         }
