@@ -17,8 +17,7 @@ pipeline{
             }
             steps{
                 sh '''
-                    apk update && apk install update
-                    apk add --no-cache curl
+                    apk update && apk add --no-cache curl
                     npm install
                     npm ci
                     npm test
@@ -51,8 +50,8 @@ pipeline{
 
             steps{
                 sshagent(credentials: ['prod-ec2-ssh-key']){
-                    sh '''
-                        set -e
+                    sh """
+                        set -eux
 
                         ssh -o StrictHostKeyChecking=no ${PROD_HOST} '
                         set -e
@@ -67,7 +66,8 @@ pipeline{
                             -e APP_VERSION='"${IMAGE_TAG}"' \
                             -p 127.0.0.1:'"${APP_PORT}"':'"${APP_PORT}"' \
                             '"${IMAGE_NAME}:${IMAGE_TAG}"'
-                    '''
+                        '
+                    """
                 }
             }
         }
@@ -80,8 +80,8 @@ pipeline{
             }
             steps {
                 sshagent(credentials: ['prod-ec2-ssh-key']) {
-                    sh '''
-                        set -e
+                    sh """
+                        set -eux
 
                         ssh -o StrictHostKeyChecking=no ${PROD_HOST} '
                         set -e
@@ -94,7 +94,7 @@ pipeline{
                         curl -fsS http://localhost/health
                         curl -fsS http://localhost/status
                         '
-                    '''
+                    """
                 }
             }
         }
