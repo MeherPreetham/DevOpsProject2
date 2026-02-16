@@ -51,10 +51,8 @@ pipeline{
         stage('Prod Deploy'){
 
             environment{
-                PROD_IP = '43.205.125.207'
-                PROD_USER = 'ubuntu'
-                PROD_HOST = "${PROD_USER}@${PROD_IP}"
-                CONTAINER_NAME = 'HealthCheckApp'
+                PROD_HOST = 'ubuntu@43.205.125.207'
+                CONTAINER_NAME = 'health-app'
                 APP_PORT = '3000'
             }
 
@@ -84,9 +82,7 @@ pipeline{
 
         stage('Prod Test'){
             environment {
-                PROD_IP = '43.205.125.207'
-                PROD_USER = 'ubuntu'
-                PROD_HOST = "${PROD_USER}@${PROD_IP}"
+                PROD_HOST = 'ubuntu@43.205.125.207'
             }
             steps {
                 sshagent(credentials: ['prod-ec2-ssh-key']) {
