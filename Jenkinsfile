@@ -38,6 +38,66 @@ pipeline{
                 }
             }
         }
+
+        stage('Prod Deploy'){
+
+            environment{
+                PROD_IP = '43.205.125.207'
+                PROD_USER = 'ubuntu'
+                PROD_HOST = "${PROD_USER}@${PROD_IP}"
+                CONTAINER_NAME = 'HealthCheckApp'
+                APP_PORT = '3000'
+            }
+
+            steps{
+                sshagent(credentials: ['prod-ec2-ssh-key']){
+                    sh '''
+                        set -e
+
+                        ssh -o StrictHostKeyChecking=no ${PROD_HOST} '
+                        set -e
+
+                        docker pull '"${IMAGE_NAME}:${IMAGE_TAG}"'
+
+                        docker rm -f '"${CONTAINER_NAME}"' 2>/dev/null || true
+
+                        docker run -d --name '"${CONTAINER_NAME}"' --restart unless-stopped \
+                            -e PORT='"${APP_PORT}"' \
+                            -e NODE_ENV=production \
+                            -e APP_VERSION='"${IMAGE_TAG}"' \
+                            -p 127.0.0.1:'"${APP_PORT}"':'"${APP_PORT}"' \
+                            '"${IMAGE_NAME}:${IMAGE_TAG}"'
+                    '''
+                }
+            }
+        }
+
+        stage('Prod Test'){
+            environment {
+                PROD_IP = '43.205.125.207'
+                PROD_USER = 'ubuntu'
+                PROD_HOST = "${PROD_USER}@${PROD_IP}"
+            }
+            steps {
+                sshagent(credentials: ['prod-ec2-ssh-key']) {
+                sh '''
+                    set -e
+
+                    ssh -o StrictHostKeyChecking=no ${PROD_HOST} '
+                    set -e
+                    # Test through Nginx (public entrypoint), locally on the instance
+                    for i in {1..30}; do
+                        curl -fsS http://localhost/health >/dev/null && break
+                        sleep 1
+                    done
+
+                    curl -fsS http://localhost/health
+                    curl -fsS http://localhost/status
+                    '
+                '''
+                }
+            }
+        }
     }
 
 }
