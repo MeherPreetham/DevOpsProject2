@@ -38,6 +38,15 @@ pipeline{
             }
         }
 
+        stage('Manual Approval'){
+            steps{
+                script{
+                    timeout(time: 30, unit: 'MINUTES') {   // adjust as you like
+                    input message: "Deploy to PRODUCTION?", ok: "Approve Deploy"
+                }
+            }
+        }
+
         stage('Prod Deploy'){
 
             environment{
